@@ -6,10 +6,9 @@
         </div>
     </div>
 </template>
-
-<script setup>
-import {ref, onMounted, computed} from "vue";
+<script setup lang="ts">
 import {marked} from "marked"
+import {computed, onMounted} from "vue";
 
 const props = defineProps({
     mdData: {
@@ -17,16 +16,16 @@ const props = defineProps({
         default: ''
     }
 })
-const mdData = ref(props.mdData)
 
-const htmlValue = computed(() => {
+const htmlValue = computed(() => marked(props.mdData))
 
-    return marked(mdData.value)
-})
+//计算目录
 const inPageNavList = computed(() => {
-    let m = mdData.value.match(/#.*?\n/g);
-    return m.map((value, key) => {
-        return {key, value: value.replaceAll("#", '').slice(1), level: value.match(/#.*? /)[0].length - 2}
+    let m = props.mdData.match(/#.*?\n/g) || [];
+    return m.map((value: any, key: number) => {
+        let titleTag = value.match(/#.*? /) || []
+        let level = titleTag[0].length - 2
+        return {key, value: value.replaceAll("#", '').slice(1), level}
     })
 })
 
@@ -41,20 +40,22 @@ onMounted(() => {
     display: flex;
 
 
-    .content{
+    .content {
         flex: 1;
         padding: 20px;
     }
+
     .inPageNav {
 
         display: inline-block;
 
-        .item{
+        .item {
             cursor: pointer;
             padding: 6px 16px;
             background: #f9f9f9;
             border-radius: 8px;
-            &:hover{
+
+            &:hover {
                 color: #03a9f4;
                 background: #f7f9f8;
             }
